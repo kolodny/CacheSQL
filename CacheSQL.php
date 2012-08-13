@@ -216,7 +216,7 @@ class CacheSQL {
 			}
 			
 			// cache it and return it
-			$this->set($hashed_query, $result, $cached_time);
+			$this->set($hashed_query, $return, $cached_time);
 			return $return;
 		}
 	}
@@ -352,6 +352,14 @@ class CacheSQL {
 			}
 		}
 	}
+	
+	public function close() {
+		if (!$this->db_connection) return;
+		return $this->db_type == 'mysqli' ?
+			mysqli_close($this->db_connection) :
+			mysql_close($this->db_connection);
+	}
+
 	
 	/**
 	 * 
