@@ -25,7 +25,7 @@ class CacheSQL {
 	
 	private $cache_connection;
 
-	// <editor-fold defaultstate="collapsed" desc="constructor">
+	// <editor-fold defaultstate="collapsed" desc="constructor, destructor">
 	
 	/**
 	 * 
@@ -64,6 +64,11 @@ class CacheSQL {
 		$this->cache_host = isset($cache_host) ? $cache_host : $host;
 		$this->cache_port = isset($cache_port) ? $cache_port : ini_get('memcache.default_port');
 	}
+	
+	function __destruct() {
+		$this->close();
+	}
+
 	// </editor-fold>
 	
 
@@ -354,10 +359,18 @@ class CacheSQL {
 	}
 	
 	public function close() {
-		if (!$this->db_connection) return;
-		return $this->db_type == 'mysqli' ?
-			mysqli_close($this->db_connection) :
-			mysql_close($this->db_connection);
+		if ($this->cache_type == 'memcache' && $this->cache_connection) {
+			$this->cache_connection->close();
+			$this->cache_connection = null;
+		}
+		if ($this->db_connection) {
+			if ($this->db_type == 'mysqli') {
+				mysqli_close($this->db_connection);
+			} else {
+				mysql_close($this->db_connection);
+			}
+			$this->db_connection = null;
+		}
 	}
 
 	
